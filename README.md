@@ -7,6 +7,7 @@ Proyecto Final · Deep Learning y Sistemas Inteligentes · Universidad del Valle
 | | |
 |---|---|
 | **Servicio en producción** | [PENDIENTE_URL_SERVICIO](PENDIENTE_URL_SERVICIO) · interfaz en `/`, API en `/docs`, monitoreo en `/monitoreo` |
+| **Repositorio** | <https://github.com/pablouwunya2021/deepproyecto-3> |
 | **Modelo base** | Proyecto 2: DCGAN 64×64 «Lumen» (espíritus guardianes elementales) |
 | **Presentación** | [`presentacion/presentacion.pdf`](presentacion/presentacion.pdf) |
 | **Resultados** | [`docs/resultados.md`](docs/resultados.md) · criterios preregistrados en [`docs/hipotesis.md`](docs/hipotesis.md) |
