@@ -8,3 +8,4 @@ checkpoints/
 registros/
 build_hf/
 .claude/
+.venv/

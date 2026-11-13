@@ -1,0 +1,250 @@
+================================================================================
+  LUMEN EN PRODUCCIÓN · GUÍA DE USO RÁPIDA (comandos listos para copiar)
+================================================================================
+
+Todo se corre desde la carpeta del proyecto, en macOS (zsh/bash).
+Las líneas que empiezan con # son comentarios: no hay que copiarlas.
+
+--------------------------------------------------------------------------------
+ 0. ANTES DE EMPEZAR (una vez por terminal)
+--------------------------------------------------------------------------------
+
+cd "/Users/pablocabrera/deep leargning/deepproyecto-3"
+
+# Pon aquí tu usuario de Hugging Face (en minúsculas). Se usa en los pasos 6 a 9.
+export HF_USER=tu_usuario_hf
+export URL=https://$HF_USER-lumen.hf.space
+
+# Si tu usuario tiene mayúsculas, puntos o guiones bajos, la URL puede cambiar:
+# cópiala del Space (menú ⋮ > "Embed this Space" > "Direct URL") y haz:
+#   export URL=https://la-url-que-te-salga.hf.space
+
+
+--------------------------------------------------------------------------------
+ 1. INSTALAR (solo la primera vez)
+--------------------------------------------------------------------------------
+
+# Opción A: entorno virtual limpio (recomendado en otra computadora)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -r requirements-dev.txt
+
+# Opción B: en esta Mac ya está todo instalado en el python3 del sistema.
+# Puedes saltarte este paso.
+
+# Cada vez que abras una terminal nueva con la opción A:
+source .venv/bin/activate
+
+
+--------------------------------------------------------------------------------
+ 2. CORRER EL SERVICIO EN TU COMPUTADORA
+--------------------------------------------------------------------------------
+
+python3 -m uvicorn app.main:app --port 7860
+
+# Déjalo corriendo y abre en el navegador:
+#   http://127.0.0.1:7860              interfaz (generar y votar)
+#   http://127.0.0.1:7860/monitoreo    tablero de monitoreo
+#   http://127.0.0.1:7860/docs         documentación de la API
+# Para apagarlo: Ctrl + C
+
+open "http://127.0.0.1:7860/?n=8&semilla=2026"
+
+
+--------------------------------------------------------------------------------
+ 3. PROBAR LA API DESDE LA TERMINAL (con el servicio corriendo)
+--------------------------------------------------------------------------------
+
+# En otra terminal. Cambia LOCAL por $URL para probar la versión en producción.
+export LOCAL=http://127.0.0.1:7860
+
+curl -s $LOCAL/salud
+
+curl -s -X POST $LOCAL/api/generar -H 'Content-Type: application/json' \
+     -d '{"n": 4, "semilla": 2026}' \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['modelo'], d['latencia_ms'], 'ms'); [print(' ', p['nombre'], p['elemento'], p['rol'], p['semilla']) for p in d['personajes']]"
+
+# Bajar un personaje exacto como PNG (cambia 12345 por una semilla de arriba)
+curl -s "$LOCAL/api/personaje/12345.png?tam=512" -o personaje.png && open personaje.png
+
+curl -s -X POST $LOCAL/api/retroalimentacion -H 'Content-Type: application/json' \
+     -d '{"semilla": 12345, "modelo": "base", "voto": "me_sirve", "filtro": true}'
+
+curl -s $LOCAL/api/estadisticas | python3 -m json.tool | head -40
+
+
+--------------------------------------------------------------------------------
+ 4. PRUEBAS
+--------------------------------------------------------------------------------
+
+python3 -m pytest -v
+# Deben salir 16 passed. La CI de GitHub corre las mismas en cada push:
+open https://github.com/pablouwunya2021/deepproyecto-3/actions
+
+
+--------------------------------------------------------------------------------
+ 5. DOCKER (lo mismo que corre en Hugging Face)
+--------------------------------------------------------------------------------
+
+# Docker Desktop tiene que estar abierto
+open -a Docker
+
+docker build -t lumen .
+docker run --rm -p 7860:7860 --name lumen lumen
+# Abrir http://127.0.0.1:7860 · apagar con Ctrl + C (o: docker stop lumen)
+
+
+--------------------------------------------------------------------------------
+ 6. DESPLEGAR EN HUGGING FACE SPACES  ← LO MÁS IMPORTANTE QUE FALTA
+--------------------------------------------------------------------------------
+
+# 6.1 Crea la cuenta en https://huggingface.co/join
+# 6.2 Crea un token con permiso "Write":
+open https://huggingface.co/settings/tokens
+
+# 6.3 Instala la herramienta e inicia sesión (pega el token cuando lo pida)
+pip install -U huggingface_hub
+hf auth login
+
+# 6.4 Publica (crea el Space si no existe; tarda unos 5-10 min en construir)
+scripts/publicar_hf.sh $HF_USER/lumen
+
+# 6.5 Mira la construcción hasta que diga "Running"
+open https://huggingface.co/spaces/$HF_USER/lumen
+
+# 6.6 Verifica que responde
+curl -s $URL/salud
+open "$URL/?n=8&semilla=2026"
+
+# Para volver a publicar después de un cambio, repite el 6.4.
+
+
+--------------------------------------------------------------------------------
+ 7. PONER LA URL EN EL README, LA PRESENTACIÓN Y EL GUION
+--------------------------------------------------------------------------------
+
+sed -i '' "s#PENDIENTE_URL_SERVICIO#$URL#g" README.md
+
+python3 -c "import json,os; p='presentacion/datos_presentacion.json'; d=json.load(open(p)); d['url_servicio']=os.environ['URL']; json.dump(d,open(p,'w'),ensure_ascii=False,indent=2)"
+
+# Capturas de la versión en producción (usa Google Chrome)
+scripts/capturas.sh $URL
+
+# Regenerar los tres PDF con la URL nueva
+python3 scripts/generar_presentacion.py
+python3 scripts/generar_guion.py
+python3 scripts/generar_guia_estudio.py
+
+
+--------------------------------------------------------------------------------
+ 8. CONSEGUIR USO REAL (pesa 20 puntos: "Evidencias del pase a producción")
+--------------------------------------------------------------------------------
+
+# Manda este link a personas AJENAS al equipo y pídeles que generen y voten:
+echo "$URL/?n=8"
+
+# Revisa cómo va el uso
+open $URL/monitoreo
+
+# Antes de la entrega (y antes de que el Space se reinicie, porque se borra
+# la base de datos) exporta los registros:
+curl -s "$URL/api/registros?limite=1000" | python3 -m json.tool > evidencias/registros/registros_produccion.json
+curl -s "$URL/api/estadisticas" | python3 -m json.tool > evidencias/registros/estadisticas_produccion.json
+curl -s "$URL/metrics" > evidencias/registros/metrics_produccion.txt
+
+# Resumen rápido de lo exportado
+python3 -c "import json; s=json.load(open('evidencias/registros/estadisticas_produccion.json')); v=sum(a['me_sirve']+a['descartar'] for a in s['retroalimentacion'].values()); print('generaciones', s['generaciones'], '| clientes distintos', s['clientes_distintos'], '| votos', v, '| p95', round(s['latencia_ms']['p95'] or 0), 'ms')"
+
+# Cambia el marcador del README por el resumen real
+python3 - <<'EOF'
+import json
+s = json.load(open("evidencias/registros/estadisticas_produccion.json"))
+votos = {k: a["me_sirve"] + a["descartar"] for k, a in s["retroalimentacion"].items()}
+ok = sum(a["me_sirve"] for a in s["retroalimentacion"].values())
+tot = sum(votos.values())
+txt = (f"ver `evidencias/registros/registros_produccion.json`: {s['generaciones']} generaciones, "
+       f"{s['clientes_distintos']} clientes distintos, {tot} votos reales, aceptación "
+       f"{(100 * ok / tot if tot else 0):.0f} %")
+r = open("README.md").read().replace("PENDIENTE_REGISTROS_PRODUCCION", txt)
+open("README.md", "w").write(r)
+print(txt)
+EOF
+
+# OJO: NO corras la prueba de carga contra producción sin --sin-votos, porque
+# mete votos simulados y ensucia los datos reales. Si quieres medir latencia real:
+python3 scripts/prueba_carga.py --url $URL --solicitudes 40 --clientes 2 --sin-votos --salida evidencias/prueba_carga_produccion.json
+
+# En el guion quedan dos huecos que se llenan a mano: "[N] personas" en la
+# diapositiva 10 y en la pregunta "¿Cómo saben que le sirve al usuario?".
+# Están en scripts/generar_guion.py (búscalos con: grep -n "\[N\]\|\[completar" scripts/generar_guion.py)
+
+
+--------------------------------------------------------------------------------
+ 9. SUBIR TODO A GITHUB
+--------------------------------------------------------------------------------
+
+git status
+git add -A
+git commit -m "Agrega URL del servicio y registros de uso real"
+git push
+
+open https://github.com/pablouwunya2021/deepproyecto-3
+
+
+--------------------------------------------------------------------------------
+ 10. REPRODUCIR TODO DESDE CERO (opcional, para demostrar reproducibilidad)
+--------------------------------------------------------------------------------
+
+python3 -m lumen.data                                                   # dataset idéntico al P2
+python3 -m lumen.train --name spectral_ema --spectral-norm --ema-decay 0.995   # ~20 min en Mac
+python3 scripts/exportar_modelo.py                                      # fp16 + banco + τ
+python3 scripts/evaluar_hipotesis.py                                    # H1-H3 -> docs/resultados.md
+# Los checkpoints base/hinge/spectral se toman de ../proyecto2-DL/checkpoints
+# (o se reentrenan con: python3 -m lumen.train --name base)
+
+
+--------------------------------------------------------------------------------
+ 11. SI ALGO FALLA
+--------------------------------------------------------------------------------
+
+"Address already in use" al correr el servicio (el puerto 7860 está ocupado):
+    lsof -ti :7860 | xargs kill
+
+"Cannot connect to the Docker daemon":
+    open -a Docker        # espera a que arranque y repite
+
+"hf: command not found":
+    pip install -U huggingface_hub     # y abre una terminal nueva
+    # si sigue sin aparecer, inicia sesión así:
+    python3 -c "from huggingface_hub import login; login()"
+
+El Space dice "Sleeping" o tarda en abrir:
+    Se duerme si nadie lo usa. Ábrelo y espera 1-2 minutos. Ábrelo 5 min antes de presentar.
+
+El Space dice "Build error":
+    open https://huggingface.co/spaces/$HF_USER/lumen?logs=build
+    (manda el error para revisarlo)
+
+El tablero de producción quedó vacío:
+    El Space se reinició y se borró SQLite. Por eso hay que exportar (paso 8) seguido.
+
+git push pide usuario/contraseña:
+    GitHub ya no acepta contraseña: usa un token (Settings > Developer settings >
+    Personal access tokens) o GitHub Desktop.
+
+
+--------------------------------------------------------------------------------
+ 12. CHECKLIST DE ENTREGA (límite: 15 de noviembre, 23:59)
+--------------------------------------------------------------------------------
+
+[ ] El Space está "Running" y $URL abre la interfaz
+[ ] README y presentación tienen la URL real (no dice PENDIENTE en ningún lado):
+        grep -rn "PENDIENTE\|pendiente" README.md presentacion/datos_presentacion.json
+[ ] Hay registros de uso real en evidencias/registros/registros_produccion.json
+[ ] Capturas de producción en evidencias/capturas/
+[ ] PDFs regenerados (presentación, guion, guía de estudio)
+[ ] Pruebas en verde: python3 -m pytest -q
+[ ] Todo subido: git status (sin cambios) y CI en verde en GitHub
+[ ] Mandar al profesor el enlace: https://github.com/pablouwunya2021/deepproyecto-3
+================================================================================
