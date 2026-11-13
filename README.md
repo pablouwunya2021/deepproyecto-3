@@ -2,14 +2,14 @@
 
 Proyecto Final · Deep Learning y Sistemas Inteligentes · Universidad del Valle · 2026
 
-**Integrantes:** Pablo Cabrera (231156) · Luis Palacios (23933) · [Integrante 3]
+**Integrantes:** Pablo Cabrera (231156) · Luis Pedro Lira · Mario Rocha
 
 | | |
 |---|---|
 | **Servicio en producción** | [PENDIENTE_URL_SERVICIO](PENDIENTE_URL_SERVICIO) · interfaz en `/`, API en `/docs`, monitoreo en `/monitoreo` |
 | **Repositorio** | <https://github.com/pablouwunya2021/deepproyecto-3> |
 | **Modelo base** | Proyecto 2: DCGAN 64×64 «Lumen» (espíritus guardianes elementales) |
-| **Presentación** | [`presentacion/presentacion.pdf`](presentacion/presentacion.pdf) |
+| **Presentación** | [`presentacion/presentacion.pdf`](presentacion/presentacion.pdf) · guion: [`presentacion/guion_presentacion.pdf`](presentacion/guion_presentacion.pdf) |
 | **Resultados** | [`docs/resultados.md`](docs/resultados.md) · criterios preregistrados en [`docs/hipotesis.md`](docs/hipotesis.md) |
 
 ![Arquitectura](evidencias/arquitectura.png)
@@ -43,12 +43,12 @@ sin suavizado), no arte final.
 |---|---|---|---|---|
 | 1 | Elección del modelo y alcance | 13 nov | Todos | Proyecto 2; usuario y decisión definidos |
 | 2 | Portar el código y verificar reproducibilidad | 13 nov | Pablo Cabrera | `lumen/`; dataset idéntico byte a byte |
-| 3 | Preregistro de hipótesis | 13 nov | Luis Palacios | [`docs/hipotesis.md`](docs/hipotesis.md) |
+| 3 | Preregistro de hipótesis | 13 nov | Luis Pedro Lira | [`docs/hipotesis.md`](docs/hipotesis.md) |
 | 4 | Entrenar la mejora (SN + EMA) | 13 nov | Pablo Cabrera | `G_spectral_ema` |
-| 5 | Servicio, interfaz y monitoreo | 13 nov | [Integrante 3] | `app/` |
-| 6 | Pruebas, Docker y CI | 13 nov | Luis Palacios | `tests/`, `Dockerfile`, `.github/workflows/ci.yml` |
+| 5 | Servicio, interfaz y monitoreo | 13 nov | Mario Rocha | `app/` |
+| 6 | Pruebas, Docker y CI | 13 nov | Luis Pedro Lira | `tests/`, `Dockerfile`, `.github/workflows/ci.yml` |
 | 7 | Evaluación de hipótesis y prueba de carga | 13 nov | Pablo Cabrera | [`docs/resultados.md`](docs/resultados.md) |
-| 8 | Despliegue en Hugging Face Spaces | 14 nov | [Integrante 3] | URL pública |
+| 8 | Despliegue en Hugging Face Spaces | 14 nov | Mario Rocha | URL pública |
 | 9 | Uso real y recolección de evidencias | 14–15 nov | Todos | registros, capturas |
 | 10 | README y presentación final | 15 nov | Todos | este documento, `presentacion.pdf` |
 
@@ -80,7 +80,7 @@ sin suavizado), no arte final.
 
 ## 4. Modelo planteado
 
-**Proyecto de origen.** Proyecto 2 — DCGAN 64×64 (Pablo Cabrera y Luis Palacios),
+**Proyecto de origen.** Proyecto 2 — DCGAN 64×64, desarrollado por Pablo Cabrera (integrante de este trío),
 repositorio <https://github.com/pablouwunya2021/proyecto2-DL>. El código está portado
 sin cambios funcionales al paquete [`lumen/`](lumen/).
 

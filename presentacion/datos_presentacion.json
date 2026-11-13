@@ -1,8 +1,8 @@
 {
   "integrantes": [
     "Pablo Cabrera (231156)",
-    "Luis Palacios (23933)",
-    "[Integrante 3]"
+    "Luis Pedro Lira",
+    "Mario Rocha"
   ],
   "url_servicio": "(pendiente: URL del Space)",
   "url_repositorio": "https://github.com/pablouwunya2021/deepproyecto-3",
@@ -22,7 +22,7 @@
     [
       "3. Preregistro de hipótesis",
       "13 nov",
-      "Luis Palacios",
+      "Luis Pedro Lira",
       "docs/hipotesis.md"
     ],
     [
@@ -34,13 +34,13 @@
     [
       "5. Servicio, interfaz y monitoreo",
       "13 nov",
-      "[Integrante 3]",
+      "Mario Rocha",
       "app/ (FastAPI, UI, SQLite)"
     ],
     [
       "6. Pruebas, Docker y CI",
       "13 nov",
-      "Luis Palacios",
+      "Luis Pedro Lira",
       "tests/, Dockerfile, GitHub Actions"
     ],
     [
@@ -52,7 +52,7 @@
     [
       "8. Despliegue en HF Spaces",
       "14 nov",
-      "[Integrante 3]",
+      "Mario Rocha",
       "URL pública"
     ],
     [
