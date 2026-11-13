@@ -1,0 +1,78 @@
+{
+  "integrantes": [
+    "Pablo Cabrera (231156)",
+    "Luis Palacios (23933)",
+    "[Integrante 3]"
+  ],
+  "url_servicio": "(pendiente: URL del Space)",
+  "url_repositorio": "(pendiente: URL del repositorio)",
+  "planificacion": [
+    [
+      "1. Elección del modelo y alcance",
+      "13 nov",
+      "Todos",
+      "Proyecto 2 elegido; usuario y decisión"
+    ],
+    [
+      "2. Portar código y reproducibilidad",
+      "13 nov",
+      "Pablo Cabrera",
+      "Paquete lumen/, dataset idéntico"
+    ],
+    [
+      "3. Preregistro de hipótesis",
+      "13 nov",
+      "Luis Palacios",
+      "docs/hipotesis.md"
+    ],
+    [
+      "4. Entrenar mejora (SN + EMA)",
+      "13 nov",
+      "Pablo Cabrera",
+      "G_spectral_ema"
+    ],
+    [
+      "5. Servicio, interfaz y monitoreo",
+      "13 nov",
+      "[Integrante 3]",
+      "app/ (FastAPI, UI, SQLite)"
+    ],
+    [
+      "6. Pruebas, Docker y CI",
+      "13 nov",
+      "Luis Palacios",
+      "tests/, Dockerfile, GitHub Actions"
+    ],
+    [
+      "7. Evaluación y prueba de carga",
+      "13 nov",
+      "Pablo Cabrera",
+      "docs/resultados.md"
+    ],
+    [
+      "8. Despliegue en HF Spaces",
+      "14 nov",
+      "[Integrante 3]",
+      "URL pública"
+    ],
+    [
+      "9. Uso real y evidencias",
+      "14–15 nov",
+      "Todos",
+      "registros, capturas"
+    ],
+    [
+      "10. README y presentación final",
+      "15 nov",
+      "Todos",
+      "README.md, presentacion.pdf"
+    ]
+  ],
+  "recomendacion": [
+    "MANTENER en producción con 'base': servicio estable (0 errores en 200 solicitudes) y sin alertas de deriva.",
+    "No adoptar SN + EMA (H1 refutada: KID ×1.65 peor). Se sirve como alternativa para comparar con votos reales.",
+    "Filtro: activado pero opcional (H2 no llegó a ×1.10). Se decide con el A/B de aceptación con y sin filtro.",
+    "Capacidad: ~2 sol/s en 2 CPU, 0.58 s por lote con 1 usuario; con 4 simultáneos p95 2.2 s (H3 no cumple).",
+    "Condición de retiro: aceptación < 20 % sostenida o alerta de deriva. Siguiente: reentrenar con conceptos aceptados."
+  ]
+}

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+# datos y pesos fp32: se regeneran (python -m lumen.data / python -m lumen.train)
+datos/
+checkpoints/
+registros/
+build_hf/
+.claude/

@@ -1,0 +1,9 @@
+# Servicio (lo que instala la imagen de produccion)
+# torch/torchvision se instalan desde el indice CPU de PyTorch (ver Dockerfile y CI)
+torch==2.13.0
+torchvision==0.28.0
+numpy==2.4.6
+pillow==12.2.0
+fastapi==0.136.3
+uvicorn==0.48.0
+prometheus_client==0.26.0

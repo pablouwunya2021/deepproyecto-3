@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen · Monitoreo</title>
+<style>
+  :root { --bg: #0b0d14; --panel: #141826; --borde: #252b40; --texto: #e7e9f2; --tenue: #8d93ab;
+          --acento: #7dd3fc; --ref: #64748b; --ok: #4ade80; --mal: #f87171; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--texto); font: 15px/1.5 system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+  h1 { margin: 0; font-size: 22px; } h2 { font-size: 15px; margin: 0 0 10px; color: var(--tenue); font-weight: 500; }
+  a { color: var(--tenue); text-decoration: none; margin-left: 16px; } a:hover { color: var(--texto); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0; }
+  .kpi, .panel { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 14px; }
+  .kpi .v { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kpi .l { color: var(--tenue); font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
+  .barra { display: grid; grid-template-columns: 70px 1fr 48px; gap: 8px; align-items: center; font-size: 13px; margin: 6px 0; }
+  .pista { position: relative; height: 14px; background: #0f1220; border-radius: 4px; overflow: hidden; }
+  .pista .s { position: absolute; left: 0; top: 0; bottom: 0; background: var(--acento); }
+  .pista .r { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #fff; opacity: .7; }
+  .alerta { padding: 8px 10px; border-radius: 8px; margin: 6px 0; font-size: 13px; }
+  .alerta.mal { background: #3b0d12; color: #fecaca; } .alerta.ok { background: #0c2a17; color: #bbf7d0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+  th { color: var(--tenue); font-weight: 500; }
+  .tabla { overflow-x: auto; }
+  .nota { color: var(--tenue); font-size: 12px; }
+  svg text { fill: var(--tenue); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Monitoreo del servicio Lumen</h1>
+    <nav><a href="/">Generador</a><a href="/docs">API</a><a href="/metrics">Prometheus</a></nav>
+  </header>
+  <p class="nota">Se actualiza cada 10 s. Fuente: <code>/api/estadisticas</code>. <span id="hora"></span></p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="panel"><h2>Solicitudes por hora</h2><div id="serie"></div></div>
+    <div class="panel"><h2>Aceptación del equipo de arte (votos)</h2><div id="acept"></div></div>
+  </div>
+  <div class="grid" style="margin-top:12px" id="deriva"></div>
+
+  <div class="panel" style="margin-top:12px">
+    <h2>Últimas solicitudes</h2>
+    <div class="tabla"><table id="tabla"></table></div>
+  </div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const fmt = (x, d = 0) => x == null ? "—" : Number(x).toFixed(d);
+const pct = (x) => x == null ? "—" : (100 * x).toFixed(1) + " %";
+
+function kpis(s) {
+  const items = [
+    ["Generaciones", s.generaciones], ["Personajes entregados", s.personajes_entregados],
+    ["Clientes distintos", s.clientes_distintos], ["Latencia p50", fmt(s.latencia_ms.p50) + " ms"],
+    ["Latencia p95", fmt(s.latencia_ms.p95) + " ms"], ["Tasa de error", pct(s.tasa_error)],
+    ["Uso del filtro", pct(s.uso_filtro)],
+  ];
+  $("kpis").innerHTML = items.map(([l, v]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+}
+
+function serie(obj) {
+  const k = Object.keys(obj).slice(-24), v = k.map(x => obj[x]);
+  if (!k.length) { $("serie").innerHTML = '<p class="nota">Sin datos todavía.</p>'; return; }
+  const W = 520, H = 160, m = 24, max = Math.max(...v), bw = (W - m) / k.length;
+  const bars = v.map((y, i) => {
+    const h = (H - 30) * y / max;
+    return `<rect x="${m + i * bw + 2}" y="${H - 18 - h}" width="${Math.max(2, bw - 4)}" height="${h}" rx="2" fill="var(--acento)"><title>${k[i]}: ${y}</title></rect>`;
+  }).join("");
+  $("serie").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%">${bars}
+    <text x="0" y="12">${max}</text><text x="${m}" y="${H - 4}">${k[0].slice(5)}</text>
+    <text x="${W}" y="${H - 4}" text-anchor="end">${k[k.length - 1].slice(5)}</text></svg>`;
+}
+
+function aceptacion(a) {
+  const ms = Object.entries(a);
+  if (!ms.length) { $("acept").innerHTML = '<p class="nota">Aún no hay votos.</p>'; return; }
+  $("acept").innerHTML = ms.map(([m, x]) => `
+    <div class="barra"><span>${m}</span><div class="pista"><div class="s" style="width:${100 * (x.tasa_aceptacion || 0)}%;background:var(--ok)"></div></div><span>${pct(x.tasa_aceptacion)}</span></div>
+    <p class="nota">${x.me_sirve} me sirve · ${x.descartar} descartados</p>`).join("");
+}
+
+function deriva(d) {
+  $("deriva").innerHTML = Object.entries(d).map(([m, x]) => {
+    const alertas = x.alertas.length
+      ? x.alertas.map(a => `<div class="alerta mal">⚠ ${a}</div>`).join("")
+      : `<div class="alerta ok">Sin alertas de deriva</div>`;
+    const barras = Object.keys(x.elementos_ref).map(e => `
+      <div class="barra"><span>${e}</span><div class="pista">
+        <div class="s" style="width:${100 * (x.elementos_servidos[e] || 0)}%"></div>
+        <div class="r" style="left:${100 * x.elementos_ref[e]}%"></div></div>
+        <span>${pct(x.elementos_servidos[e] || 0)}</span></div>`).join("");
+    return `<div class="panel"><h2>Deriva · ${m} (últimas ${x.solicitudes_ventana} solicitudes)</h2>${alertas}
+      <p class="nota">Novedad media servida ${fmt(x.novedad_media_servida, 3)} · referencia ${fmt(x.novedad_ref_media, 3)}
+      · z sin filtro ${fmt(x.z_novedad_sin_filtro, 1)} · TV elementos ${fmt(x.distancia_tv_elementos, 2)}</p>
+      ${barras}<p class="nota">Barra: proporción servida · línea blanca: referencia de calibración.</p></div>`;
+  }).join("");
+}
+
+function tabla(rs) {
+  const filas = rs.solicitudes.slice(0, 25).map(r => `<tr><td>${new Date(r.ts * 1000).toLocaleString()}</td>
+    <td>${r.endpoint}</td><td>${r.modelo || ""}</td><td>${r.n ?? ""}</td><td>${r.filtro == null ? "" : r.filtro ? "sí" : "no"}</td>
+    <td>${fmt(r.latencia_ms)}</td><td>${r.estado}</td><td>${fmt(r.novedad_media, 3)}</td><td>${r.cliente || ""}</td></tr>`).join("");
+  $("tabla").innerHTML = `<tr><th>Fecha</th><th>Ruta</th><th>Modelo</th><th>n</th><th>Filtro</th><th>ms</th><th>Estado</th><th>Novedad</th><th>Cliente (hash)</th></tr>${filas}`;
+}
+
+async function cargar() {
+  const [s, r] = await Promise.all([fetch("/api/estadisticas").then(x => x.json()),
+                                    fetch("/api/registros?limite=25").then(x => x.json())]);
+  kpis(s); serie(s.solicitudes_por_hora); aceptacion({...s.retroalimentacion, ...s.aceptacion_por_filtro}); deriva(s.deriva); tabla(r);
+  $("hora").textContent = "Última lectura: " + new Date().toLocaleTimeString();
+}
+cargar(); setInterval(cargar, 10000);
+</script>
+</body>
+</html>

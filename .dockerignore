@@ -1,0 +1,13 @@
+.git
+.github
+datos/
+checkpoints/
+registros/
+evidencias/
+presentacion/
+docs/
+tests/
+scripts/
+**/__pycache__
+*.pdf
+.pytest_cache

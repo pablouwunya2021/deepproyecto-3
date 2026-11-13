@@ -1,0 +1,18 @@
+{
+  "url": "http://127.0.0.1:7860",
+  "fecha": "2026-11-13 01:09:15",
+  "solicitudes": 200,
+  "clientes_concurrentes": 4,
+  "duracion_s": 126.98,
+  "rps": 1.58,
+  "errores": 0,
+  "latencia_ms": {
+    "p50": 2777.499834000082,
+    "p95": 3014.3097909999597,
+    "p99": 3106.6883329999655,
+    "media": 2490.9557785700017,
+    "max": 3187.8923750000467,
+    "nota": "p95 calculado sobre solicitudes con filtro (criterio H3)"
+  },
+  "latencia_servidor_ms_media": 2457.6515
+}

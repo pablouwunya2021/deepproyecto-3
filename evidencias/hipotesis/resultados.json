@@ -1,0 +1,92 @@
+{
+  "fecha": "2026-11-13T01:12:01",
+  "protocolo": {
+    "semilla": 777,
+    "n_generadas": 2000,
+    "kid_subconjuntos": 10,
+    "kid_tam": 1000
+  },
+  "H1": {
+    "kid": {
+      "base": {
+        "media": 0.0014113679889996345,
+        "std": 1.3826592498833599e-05
+      },
+      "hinge": {
+        "media": 0.001380003911104044,
+        "std": 1.2163777366258823e-05
+      },
+      "spectral": {
+        "media": 0.0023967730562451718,
+        "std": 1.4128468181549062e-05
+      },
+      "spectral_ema_sin_ema": {
+        "media": 0.0023967730562451718,
+        "std": 1.4128468181549062e-05
+      },
+      "spectral_ema": {
+        "media": 0.0023304952178620384,
+        "std": 1.435082823622709e-05
+      }
+    },
+    "kid_piso_real_vs_real": {
+      "media": -2.527922717820985e-07,
+      "std": 7.566204451549664e-07
+    },
+    "razon_spectral_ema_vs_base": 1.6512314548907074,
+    "criterio": "<= 0.85",
+    "cumple": false,
+    "modelo_por_defecto": "base"
+  },
+  "H2": {
+    "modelo": "base",
+    "lotes": 200,
+    "n": 8,
+    "diversidad": {
+      "directo": 0.7201285460591316,
+      "filtro": 0.7793554818630218
+    },
+    "razon_diversidad": 1.0822449493607869,
+    "cobertura_elementos": {
+      "directo": 4.585,
+      "filtro": 5.195
+    },
+    "novedad_media": {
+      "directo": 0.5969086454063653,
+      "filtro": 0.6246812168508769
+    },
+    "kid": {
+      "directo": 0.0013806480220559525,
+      "filtro": 0.0014020256128770558
+    },
+    "razon_kid": 1.015483736969593,
+    "cumple": false
+  },
+  "H3": {
+    "dif_media_pixel_0_255": 0.010410229675471783,
+    "dif_max_pixel_0_255": 0.5213529467582703,
+    "acuerdo_elemento": 0.996,
+    "tam_mb_fp32": 15.238969,
+    "tam_mb_fp16": 7.622585,
+    "prueba_carga": {
+      "url": "http://127.0.0.1:7860",
+      "fecha": "2026-11-13 01:11:47",
+      "solicitudes": 200,
+      "clientes_concurrentes": 4,
+      "duracion_s": 95.6,
+      "rps": 2.09,
+      "errores": 0,
+      "latencia_ms": {
+        "p50": 1860.69591699993,
+        "p95": 2215.9884170000623,
+        "p99": 2276.4168329999848,
+        "media": 1887.7968939450125,
+        "max": 2291.0596250001163,
+        "nota": "p95 calculado sobre solicitudes con filtro (criterio H3)"
+      },
+      "latencia_servidor_ms_media": 1879.709
+    },
+    "latencia_p95_ms": 2215.9884170000623,
+    "cumple": false
+  }
+}

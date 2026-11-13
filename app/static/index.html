@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen · Conceptos de personajes</title>
+<style>
+  :root {
+    --bg: #0b0d14; --panel: #141826; --borde: #252b40; --texto: #e7e9f2; --tenue: #8d93ab;
+    --acento: #7dd3fc; --ok: #4ade80; --mal: #f87171;
+    --brasa: #fb7a4b; --marea: #38bdf8; --musgo: #4ade80; --cefiro: #5eead4; --vacio: #c084fc; --solar: #facc15;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--texto);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 16px 8px; max-width: 1180px; margin: 0 auto;
+           display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
+  h1 span { color: var(--acento); }
+  nav a { color: var(--tenue); margin-left: 16px; text-decoration: none; }
+  nav a:hover { color: var(--texto); }
+  .sub { color: var(--tenue); max-width: 1180px; margin: 0 auto; padding: 0 16px; }
+  form { max-width: 1180px; margin: 16px auto; padding: 14px 16px; background: var(--panel);
+         border: 1px solid var(--borde); border-radius: 12px;
+         display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--tenue); }
+  input, select { background: var(--bg); color: var(--texto); border: 1px solid var(--borde);
+                  border-radius: 8px; padding: 8px 10px; font: inherit; min-width: 0; }
+  input[type=number] { width: 150px; }
+  .check { flex-direction: row; align-items: center; gap: 8px; color: var(--texto); }
+  button { background: var(--acento); color: #04121c; border: 0; border-radius: 8px;
+           padding: 9px 18px; font: 600 15px system-ui; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: wait; }
+  #estado { color: var(--tenue); font-size: 13px; margin-left: auto; }
+  main { max-width: 1180px; margin: 0 auto; padding: 0 16px 40px;
+         display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; overflow: hidden;
+          display: flex; flex-direction: column; }
+  .card img { width: 100%; aspect-ratio: 1; image-rendering: pixelated; display: block; background: #000; }
+  .info { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .nombre { font-weight: 600; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .chip { font-size: 11px; padding: 2px 8px; border-radius: 99px; border: 1px solid currentColor; text-transform: uppercase; letter-spacing: .5px; }
+  .meta { color: var(--tenue); font-size: 12px; }
+  .acciones { display: flex; gap: 6px; margin-top: 8px; }
+  .acciones button, .acciones a { flex: 1; font-size: 12px; padding: 6px 4px; border-radius: 6px; text-align: center;
+           background: transparent; color: var(--texto); border: 1px solid var(--borde); text-decoration: none; font-weight: 500; }
+  .acciones .si.marcado { background: var(--ok); color: #052e12; border-color: var(--ok); }
+  .acciones .no.marcado { background: var(--mal); color: #3b0909; border-color: var(--mal); }
+  .vacio { grid-column: 1 / -1; text-align: center; color: var(--tenue); padding: 60px 0; }
+  @media (max-width: 520px) { #estado { margin-left: 0; width: 100%; } input[type=number] { width: 120px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lumen <span>·</span> conceptos de personajes</h1>
+  <nav><a href="/monitoreo">Monitoreo</a><a href="/docs">API</a><a href="/api/modelo">Tarjeta del modelo</a></nav>
+</header>
+<p class="sub">Genera espíritus guardianes elementales (DCGAN 64×64). Marca los que sirven como punto de partida
+  para el equipo de arte; tu voto alimenta la métrica de aceptación del modelo.</p>
+
+<form id="f">
+  <label>Cantidad <input type="number" id="n" min="1" max="16" value="8"></label>
+  <label>Semilla (opcional) <input type="number" id="semilla" min="0" placeholder="aleatoria"></label>
+  <label>Modelo <select id="modelo"></select></label>
+  <label class="check"><input type="checkbox" id="filtro" checked> Filtro de novedad y diversidad</label>
+  <button id="btn" type="submit">Generar</button>
+  <span id="estado"></span>
+</form>
+
+<main id="galeria"><div class="vacio">Pulsa <b>Generar</b> para ver personajes nuevos.</div></main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const COLORES = { brasa: "var(--brasa)", marea: "var(--marea)", musgo: "var(--musgo)",
+                  cefiro: "var(--cefiro)", vacio: "var(--vacio)", solar: "var(--solar)" };
+
+const q = new URLSearchParams(location.search);
+if (q.has("n")) $("n").value = q.get("n");
+if (q.has("semilla")) $("semilla").value = q.get("semilla");
+if (q.get("filtro") === "0") $("filtro").checked = false;
+
+fetch("/salud").then(r => r.json()).then(s => {
+  const elegido = q.get("modelo") || s.modelo_por_defecto;
+  for (const m of s.modelos) {
+    const o = document.createElement("option");
+    o.value = m; o.textContent = m + (m === s.modelo_por_defecto ? " (por defecto)" : "");
+    if (m === elegido) o.selected = true;
+    $("modelo").appendChild(o);
+  }
+  // un enlace con ?semilla=... reproduce el lote exacto (para compartirlo con el equipo)
+  if (q.has("semilla")) $("f").requestSubmit();
+});
+
+async function votar(btn, p, modelo, voto, filtro) {
+  const card = btn.closest(".card");
+  card.querySelectorAll(".si,.no").forEach(b => b.classList.remove("marcado"));
+  btn.classList.add("marcado");
+  await fetch("/api/retroalimentacion", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ semilla: p.semilla, modelo, elemento: p.elemento, voto, filtro }) });
+}
+
+function tarjeta(p, modelo, filtro) {
+  const c = document.createElement("div");
+  c.className = "card";
+  c.innerHTML = `
+    <img alt="${p.nombre}" src="data:image/png;base64,${p.png_base64}">
+    <div class="info">
+      <div class="nombre">${p.nombre}<span class="chip" style="color:${COLORES[p.elemento]}">${p.elemento}</span></div>
+      <div class="meta">${p.rol}</div>
+      <div class="meta">semilla ${p.semilla} · novedad ${p.novedad.toFixed(3)}</div>
+      <div class="acciones">
+        <button class="si" type="button">Me sirve</button>
+        <button class="no" type="button">Descartar</button>
+        <a href="${p.url}&tam=512" download="${p.nombre}_${p.semilla}.png">PNG</a>
+      </div>
+    </div>`;
+  c.querySelector(".si").onclick = (e) => votar(e.target, p, modelo, "me_sirve", filtro);
+  c.querySelector(".no").onclick = (e) => votar(e.target, p, modelo, "descartar", filtro);
+  return c;
+}
+
+$("f").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("btn").disabled = true; $("estado").textContent = "Generando…";
+  const body = { n: +$("n").value, filtro: $("filtro").checked, modelo: $("modelo").value };
+  if ($("semilla").value !== "") body.semilla = +$("semilla").value;
+  try {
+    const r = await fetch("/api/generar", { method: "POST", headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(JSON.stringify(d.detail));
+    const g = $("galeria"); g.innerHTML = "";
+    d.personajes.forEach(p => g.appendChild(tarjeta(p, d.modelo, d.filtro)));
+    const enlace = `?n=${body.n}&semilla=${d.semilla}&modelo=${d.modelo}&filtro=${body.filtro ? 1 : 0}`;
+    $("estado").innerHTML = `lote ${d.semilla} · ${d.modelo} · ${d.latencia_ms.toFixed(0)} ms · <a href="${enlace}" style="color:var(--acento)">enlace al lote</a>`;
+  } catch (err) {
+    $("estado").textContent = "Error: " + err.message;
+  } finally { $("btn").disabled = false; }
+});
+</script>
+</body>
+</html>

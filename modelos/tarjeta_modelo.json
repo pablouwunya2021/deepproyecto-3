@@ -1,0 +1,107 @@
+{
+  "nombre": "Lumen - generador de conceptos de personajes",
+  "proyecto_origen": "Proyecto 2 (DCGAN 64x64), mejorado en el Proyecto Final",
+  "exportado": "2026-11-13T01:01:24",
+  "arquitectura": "DCGAN: G con 5 ConvTranspose2d + BatchNorm + ReLU, z de 128 dims, salida 3x64x64 tanh",
+  "extractor_features": "squeezenet1_1 (ImageNet), 512 dims, L2",
+  "datos": {
+    "n": 5000,
+    "semilla": 20260101,
+    "elementos_ref": {
+      "brasa": 0.1668,
+      "cefiro": 0.1818,
+      "marea": 0.1562,
+      "musgo": 0.168,
+      "solar": 0.1582,
+      "vacio": 0.169
+    }
+  },
+  "calibracion": {
+    "semilla": 999,
+    "n": 1000,
+    "tau": "percentil 10 de la novedad de muestras directas"
+  },
+  "modelos_servidos": [
+    "base",
+    "spectral_ema"
+  ],
+  "modelo_por_defecto": "base",
+  "decision_h1": "KID spectral_ema / base = 1.651 (no cumple <= 0.85)",
+  "modelos": {
+    "base": {
+      "descripcion": "Proyecto 2 - DCGAN BCE + BatchNorm en D (linea base en produccion)",
+      "sha256_16": "8f2aa378e49bca06",
+      "tau": 0.5101364254951477,
+      "novedad_ref_media": 0.5996972918510437,
+      "novedad_ref_std": 0.06868059933185577,
+      "elementos_ref": {
+        "brasa": 0.111,
+        "cefiro": 0.208,
+        "marea": 0.143,
+        "musgo": 0.198,
+        "solar": 0.186,
+        "vacio": 0.154
+      }
+    },
+    "hinge": {
+      "descripcion": "Proyecto 2 - experimento A, perdida hinge",
+      "sha256_16": "1fd3dec895052bc1",
+      "tau": 0.5053585171699524,
+      "novedad_ref_media": 0.6011754274368286,
+      "novedad_ref_std": 0.07174476236104965,
+      "elementos_ref": {
+        "brasa": 0.124,
+        "cefiro": 0.234,
+        "marea": 0.096,
+        "musgo": 0.157,
+        "solar": 0.198,
+        "vacio": 0.191
+      }
+    },
+    "spectral": {
+      "descripcion": "Proyecto 2 - experimento B, normalizacion espectral en D",
+      "sha256_16": "745a71fb2a78adc8",
+      "tau": 0.6365221738815308,
+      "novedad_ref_media": 0.7278069257736206,
+      "novedad_ref_std": 0.058650825172662735,
+      "elementos_ref": {
+        "brasa": 0.116,
+        "cefiro": 0.155,
+        "marea": 0.192,
+        "musgo": 0.207,
+        "solar": 0.157,
+        "vacio": 0.173
+      }
+    },
+    "spectral_ema": {
+      "descripcion": "Proyecto Final - normalizacion espectral en D + EMA de G (0.995)",
+      "sha256_16": "531e4dd1f058f2ab",
+      "tau": 0.6512654423713684,
+      "novedad_ref_media": 0.7174596190452576,
+      "novedad_ref_std": 0.05671066790819168,
+      "elementos_ref": {
+        "brasa": 0.143,
+        "cefiro": 0.16,
+        "marea": 0.231,
+        "musgo": 0.189,
+        "solar": 0.167,
+        "vacio": 0.11
+      }
+    },
+    "spectral_ema_sin_ema": {
+      "descripcion": "Proyecto Final - misma corrida, G sin EMA (control)",
+      "sha256_16": "1c4b59d125a9d889",
+      "tau": 0.6365221738815308,
+      "novedad_ref_media": 0.7278069257736206,
+      "novedad_ref_std": 0.058650825172662735,
+      "elementos_ref": {
+        "brasa": 0.116,
+        "cefiro": 0.155,
+        "marea": 0.192,
+        "musgo": 0.207,
+        "solar": 0.157,
+        "vacio": 0.173
+      }
+    }
+  }
+}
